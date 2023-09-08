@@ -1,0 +1,271 @@
+﻿@model MVCApplication1.Models.ViewModel.GetData
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Order</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 15px;
+        }
+
+        .order-form {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff; /* Form background color */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+
+        .text-danger {
+            color: red;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+            .btn:hover {
+                background-color: #2980b9;
+            }
+
+        .back-link {
+            margin-top: 15px;
+        }
+
+            .back-link a {
+                color: #3498db;
+                text-decoration: none;
+                transition: color 0.3s ease-in-out;
+            }
+
+                .back-link a:hover {
+                    color: #2980b9;
+                }
+
+            .back-link a {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+
+                .back-link a:hover {
+                    background-color: #0056b3;
+                }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create</h1>
+        <hr />
+        <div class="row">
+            <div class="col-md-6">
+                <form asp-action="CreateOrder" id="form" class="order-form">
+                    <div id="AddMyProduct">
+
+                    </div>
+
+                    <div class="form-group">
+                        <input type="submit" value="Place" class="btn btn-primary" />
+                    </div>
+                </form>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label for="ItemName" class="control-label">Item Name:</label>
+                    <select id="itemDropdown" class="form-control">
+
+                        <option>Select</option>
+                        @foreach (var email in ViewBag.Item)
+                        {
+                            <option value="@email">@email</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="Cust_Email" class="control-label">Customer Email:</label>
+                    <select id="cust_mail" class="form-control">
+                        @foreach (var email in ViewBag.CustomerEmails)
+                        {
+                            <option value="@email">@email</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="IQuantity" class="control-label">Quantity:</label>
+
+                    <select id="IQuantity" class="form-control">
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="IRate" class="control-label">Rate:</label>
+                    <input id="IRate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <input id="AddButton" type="button" value="Add" class="btn btn-primary" />
+                </div>
+
+            </div>
+        </div>
+        <div class="back-link">
+            <a asp-asp-controller="PlaceOrder" asp-action="GetAllOrders">Back to List</a>
+        </div>
+        <div class="back-link">
+            <a asp-asp-controller="Item" asp-action="GetallItems">Back to Items</a>
+        </div>
+    </div>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    var rate;
+
+    document.querySelector('.order-form').addEventListener('submit', function () {
+        // Enable the fields before submission
+        document.getElementById('IQuantity').disabled = false;
+        document.getElementById('IRate').disabled = true;
+    });
+
+    // Capture the change event of the dropdown
+    document.getElementById('itemDropdown').addEventListener('change', function () {
+        // Get the selected value
+        var selectedItem = this.value;
+
+        // Make an AJAX request to the controller action
+        $.ajax({
+            type: "POST",
+            url: "Ajax_item", // Replace with your controller and action method's URL
+            data: { ItemName: selectedItem }, // <-- Comma was missing here
+            success: function (response) {
+                for (var i = 1; i <= response.iQuantity; i++) {
+                    $('#IQuantity').append($('<option>', {
+                        value: i,
+                        text: i
+                    }));
+                }
+                rate = response.iRate;
+                document.getElementById('IRate').value = response.iRate;
+                document.getElementById('IQuantity').disabled = false;
+                document.getElementById('IRate').disabled = true;
+
+            },
+            error: function (error) {
+                // Handle errors, if any
+                console.error(error);
+            }
+        });
+    });
+   
+
+    $(document).ready(function () {
+        $('#IQuantity').on('input', function () {
+            var quantity = $(this).val();
+            //document.getElementById('Rate').value = quantity * rate;
+            $('#IRate').val(quantity * rate);
+
+        });
+    });
+
+
+    var itemNames = @Html.Raw(Json.Serialize(ViewBag.Item));
+
+    // Now you can use the 'itemNames' array in your jQuery code
+    $(document).ready(function () {
+        // Example: Loop through the array and perform some action
+        itemNames.forEach(function (item) {
+            console.log(item); // Replace this with your actual jQuery code
+        });
+
+        $("#AddButton").click(function () {
+            var ItemName = $("#itemDropdown").val();
+            var IQuantity = $("#IQuantity").val();
+            var IRate = $("#IRate").val();
+            var cust_Email = $("#cust_mail").val();
+
+            console.log(ItemName); console.log(IQuantity); console.log(IRate);
+            var NameInput = '<input type="text"  name="ItemName[]" readonly value="' + ItemName + '">';
+            var EmailInput = '<input type="hidden"  name="cust_Email[]" readonly value="' + cust_Email + '">';
+            var QInput = '<input type="text" name="IQuantity[]" readonly value="' + IQuantity + '">';
+            var RInput = '<input type="text" name="IRate[]" readonly value="' + IRate + '">';
+
+            $("#AddMyProduct").append(NameInput);
+            $("#AddMyProduct").append(EmailInput);
+            $("#AddMyProduct").append(QInput);
+            $("#AddMyProduct").append(RInput);
+            $("#AddMyProduct").append("<br>");
+
+        });
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('form');
+        form.addEventListener('submit', function (event) {
+            var confirmed = confirm('Are you sure you want to Place the Order?');
+            if (!confirmed) {
+                event.preventDefault(); // Cancel form submission if not confirmed
+            }
+        });
+    });
+</script>`
+
+</html>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

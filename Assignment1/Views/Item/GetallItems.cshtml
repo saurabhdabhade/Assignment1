@@ -1,0 +1,199 @@
+﻿@using MVCApplication1.Models.ViewModel;
+@model IEnumerable<MVCApplication1.Models.ViewModel.ItemViewModel>
+
+@{
+    ViewData["Title"] = "GetallItems";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<h1>Items</h1>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item List</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .create-link {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .back-link
+        {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+            .table th,
+            .table td {
+                padding: 8px;
+                border: 1px solid #ccc;
+            }
+
+            .table th {
+                background-color: #f2f2f2;
+                text-align: left;
+            }
+
+        .action-link {
+            display: inline-block;
+            padding: 4px 8px;
+            text-decoration: none;
+            border-radius: 3px;
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+        }
+
+        .edit-link, #create-link {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .delete-link {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-link:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        .back-link a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+            .back-link a:hover {
+                background-color: #0056b3;
+            }
+
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+            .pagination a {
+                display: inline-block;
+                padding: 8px 12px;
+                margin: 0 4px;
+                color: #333;
+                text-decoration: none;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+
+                .pagination a.active,
+                .pagination a:hover {
+                    background-color: #007bff;
+                    color: white;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p >
+            <a class="btn btn-primary" id="create-link" asp-action="Create">Create New</a>
+        </p>
+        <p>
+            <a class="btn btn-success" href="@Url.Action("ExcelDownload", "Item")">Download Excel</a>
+        </p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Item Rate</th>
+                    <th>Item Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.ItemName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.IRate)</td>
+                        <td>@Html.DisplayFor(modelItem => item.IQuantity)</td>
+                        <td>
+                            <a class="action-link edit-link" asp-action="Edit" asp-route-ItemName="@item.ItemName" asp-controller="Item">Edit</a>
+                            <a id="delete" class="action-link delete-link" href="/Item/DeleteItem?Itemname=@item.ItemName" onclick="return confirm('Are you sure you want to delete this customer?');">Delete</a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @* <div class="back-link">
+                <a asp-controller="Home" asp-action="Index">Back to Home</a>
+        </div> *@
+        <div class="back-link">
+            <a asp-controller="PlaceOrder" asp-action="Create">Select Item For Place</a>
+        </div>
+        <div class="back-link">
+            <a asp-controller="PlaceOrder" asp-action="GetAllOrders">Go To Orders List</a>
+        </div>
+
+        <div class="pagination">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <a href="@Url.Action("GetallItems", new { page = i, pageSize = ViewBag.PageSize })"
+                   class="@(i == ViewBag.CurrentPage ? "active" : "")">
+                    @i
+                </a>
+            }
+        </div>
+        
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#delete").on("click", function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            var confirmed = confirm("Are you sure you want to delete this Item?");
+
+            if (confirmed) {
+                window.location.href = url; // Proceed with the delete action
+            }
+        });
+    });
+</script>
+</html>

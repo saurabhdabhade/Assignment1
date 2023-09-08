@@ -1,0 +1,118 @@
+﻿@model MVCApplication1.Models.ViewModel.RegisterViewModel
+
+@{
+    ViewData["Title"] = "ResetPass";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset Password</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Reset Password</h2>
+        <form method="ResetPassword">
+            <input type="hidden" id="email" name="email" asp-for="Email">
+            <label for="newPassword">New Password:</label>
+            <input type="password" id="newPassword" name="newPassword" required>
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+            <button asp-action="ResetPassword" asp-controller="Register" type="submit">Reset Password</button>
+        </form>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+        function resetPassword() {
+            var new_password = $("#newPassword").val(); // Assuming you have an input field with id "newPasswordInput"
+            var confirm_password = $("#confirmPassword").val(); // Assuming you have an input field with id "confirmPasswordInput"
+
+            $.ajax({
+                type: "GET", // Use GET method to send data
+                url: "/Register/ResetPassword", // Replace ControllerName with the actual name of your controller
+            data: { new_password: new_password, confirm_password: confirm_password },
+            success: function () {
+                    // Handle success, e.g., show a success message or redirect
+                    alert("Password reset successfully");
+                    window.location.href = "/Register/Logins"; // Redirect to Logins action in Register controller
+                },
+                error: function () {
+                    // Handle errors, e.g., display an error message
+                    alert("Password reset failed");
+                }
+            });
+        }
+</script>
+</html>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+
+

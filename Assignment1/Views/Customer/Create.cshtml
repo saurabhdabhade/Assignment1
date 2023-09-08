@@ -1,0 +1,252 @@
+﻿@model MVCApplication1.Models.ViewModel.GetCustomerData
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Customer</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h4 {
+            margin-bottom: 15px;
+        }
+
+        .customer-form {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+
+        .text-danger {
+            color: red;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+            .btn:hover {
+                background-color: #2980b9;
+            }
+
+        .result {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .back-link {
+            margin-top: 15px;
+        }
+
+            .back-link a {
+                color: #3498db;
+                text-decoration: none;
+                transition: color 0.3s ease-in-out;
+            }
+
+                .back-link a:hover {
+                    color: #2980b9;
+                }
+
+            .back-link a {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+
+                .back-link a:hover {
+                    background-color: #0056b3;
+                }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create</h1>
+        <hr />
+        <div class="row">
+            <div class="col-md-6">
+                <form asp-action="CreateCustomer" id="customerForm" class="customer-form">
+                    <div id="AddCustomer">
+
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Create" id="submitButton" class="btn btn-primary" />
+                    </div>
+                    <div class="back-link">
+                        <a asp-controller="Customer" asp-action="Delete">Cancel</a>
+                    </div>
+                </form>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label for="Cust_FirstName" class="control-label">First Name:</label>
+                        <input id= "firstName"  class="form-control" />
+                    </div>
+                <div  class="form-group">
+                        <label for="Cust_LastName" class="control-label">Last Name:</label>
+                    <input id="lastName"  class="form-control" />
+                    </div>
+                <div  class="form-group">
+                        <label for="Cust_Phone" class="control-label">Phone:</label>
+                    <input id="phone"  class="form-control" />
+                    </div>
+                <div  class="form-group">
+                        <label for="Cust_Email" class="control-label">Email:</label>
+                    <input id="email"  class="form-control" />
+                        <div style="color:red" id="resultDiv"></div>
+                        <div style="color:green" id="resultDiv1"></div>
+                        <div class="result" id="resultDiv"></div>
+                        <div class="result" id="resultDiv1"></div>
+                    </div>
+                    <div class="form-group">
+                        <input id="AddButton" type="button" value="Add" class="btn btn-primary" />
+                    </div>
+                    
+            </div>
+        </div>
+        <div class="back-link">
+            <a asp-controller="Customer" asp-action="GetAllCustomers">Back to List</a>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Attach the blur event handler to the input element
+        $("#myInput").blur(function () {
+            // Get the value from the input element
+            var inputValue = $(this).val();
+
+            // Perform the AJAX call
+            $.ajax({
+                type: "POST",
+                url: "Ajax_Response", // Replace with your controller and action method's URL
+                data: { Cust_Email: inputValue }, // Send the input value to the controller
+                success: function (response) {
+                    if (response.includes('Already')) {
+                        $("#resultDiv").append(response);
+                    } else {
+                        $("#resultDiv1").html(response);
+                    }
+                },
+                error: function (error) {
+                    // Handle errors, if any
+                    console.error(error);
+                }
+            });
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        $('#submitButton').click(function () {
+            var formData = $('#customerForm').serialize();
+            var url = '/Customer/CreateCustomer'; // Replace with your actual URL
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                success: function (result) {
+                    // Handle the success response if needed
+                    // For example, display a success message
+                    $('#resultDiv').text('Customer created successfully.');
+                    $('#resultDiv').css('color', 'green');
+                },
+                error: function (error) {
+                    // Handle the error response if needed
+                    // For example, display an error message
+                    $('#resultDiv').text('Error creating customer.');
+                    $('#resultDiv').css('color', 'red');
+                }
+            });
+        });
+    });
+
+
+
+
+    $("#AddButton").click(function () {
+        var Cust_FirstName = $("#firstName").val();
+        var Cust_LastName = $("#lastName").val();
+        var Cust_Phone = $("#phone").val();
+        var Cust_Email = $("#email").val();
+
+        console.log(Cust_FirstName); console.log(Cust_LastName); console.log(Cust_Phone); console.log(Cust_Email);
+
+        var NameInput = '<input type="text"  name="Cust_FirstName[]" readonly value="' + Cust_FirstName + '">';
+        var LastInput = '<input type="text"  name="Cust_LastName[]" readonly value="' + Cust_LastName + '">';
+        var PInput = '<input type="text" name="Cust_Phone[]" readonly value="' + Cust_Phone + '">';
+        var EInput = '<input type="text" name="Cust_Email[]" readonly value="' + Cust_Email + '">';
+
+        $("#AddCustomer").append(NameInput);
+        $("#AddCustomer").append(LastInput);
+        $("#AddCustomer").append(PInput);
+        $("#AddCustomer").append(EInput);
+        $("#AddCustomer").append("<br>");
+
+    });
+</script>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        }
+
+
