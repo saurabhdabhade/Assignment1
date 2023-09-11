@@ -31,5 +31,7 @@ namespace LibraryClass.Models
 
         public DateTime EventDateTime { get; set; } = DateTime.Now;
 
+        public bool IsDeleted { get; set; } 
+
     }
 }

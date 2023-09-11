@@ -1,4 +1,4 @@
-﻿@model MVCApplication1.Models.ViewModel.ItemViewModel
+﻿@model MVCApplication1.Models.ViewModel.GetItems
 
 @{
     ViewData["Title"] = "Create";
@@ -102,30 +102,37 @@
         <div class="row">
             <div class="col-md-6">
                 <form asp-action="Create_Item" class="item-form">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-group">
-                        <label asp-for="ItemName" class="control-label">Item Name:</label>
-                        <input asp-for="ItemName" class="form-control" id="myInput" />
-                        <span asp-validation-for="ItemName" class="text-danger"></span>
-                        <div style="color:red" id="resultDiv"></div>
-                        <div style="color:green" id="resultDiv1"></div>
-                        <div class="result" id="resultDiv"></div>
-                        <div class="result" id="resultDiv1"></div>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="IRate" class="control-label">Item Rate:</label>
-                        <input asp-for="IRate" class="form-control" />
-                        <span asp-validation-for="IRate" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="IQuantity" class="control-label">Item Quantity:</label>
-                        <input asp-for="IQuantity" class="form-control" />
-                        <span asp-validation-for="IQuantity" class="text-danger"></span>
+                    <div id="AddItem">
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Create" class="btn btn-primary" />
                     </div>
                 </form>
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label for="ItemName" class="control-label">Item Name:</label>
+                    <input id="fistName" class="form-control" required />
+                    <div style="color:red" id="resultDiv"></div>
+                    <div style="color:green" id="resultDiv1"></div>
+                    <div class="result" id="resultDiv"></div>
+                    <div class="result" id="resultDiv1"></div>
+                    <div style="color:red" id="itemNameValidation" class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="IRate" class="control-label">Item Rate:</label>
+                    <input id="lastName" class="form-control" />
+                    <div style="color:red" id="irateValidation" class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="IQuantity" class="control-label">Item Quantity:</label>
+                    <input id="phone" class="form-control" />
+                    <div style="color:red" id="iquantityValidation" class="validation-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <input id="AddButton" type="button" value="Add" class="btn btn-primary" />
+                </div>
             </div>
         </div>
         <div class="back-link">
@@ -134,36 +141,106 @@
     </div>
 </body>
 </html>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-      // Attach the blur event handler to the input element
-      $("#myInput").blur(function() {
-        // Get the value from the input element
-        var inputValue = $(this).val();
+    $(document).ready(function () {
+        // Attach the blur event handler to the input element
+        $("#myInput").blur(function () {
+            // Get the value from the input element
+            var inputValue = $(this).val();
 
-        // Perform the AJAX call
-        $.ajax({
+            // Perform the AJAX call
+            $.ajax({
                 type: "POST",
                 url: "Ajax_Call", // Replace with your controller and action method's URL
-          data: { ItemName: inputValue }, // Send the input value to the controller
-          success: function(response) {
-              if (response.includes('Already')) {
+                data: { ItemName: inputValue }, // Send the input value to the controller
+                success: function (response) {
+                    if (response.includes('Already')) {
                         $("#resultDiv").append(response);
-              }              else {
+                    } else {
                         $("#resultDiv1").html(response);
-              }
-          },
-          error: function(error) {
-            // Handle errors, if any
-            console.error(error);
-          }
+                    }
+                },
+                error: function (error) {
+                    // Handle errors, if any
+                    console.error(error);
+                }
+            });
         });
-      });
+    });
+
+
+
+
+
+    $("#AddButton").click(function () {
+        var ItemName = $("#fistName").val();
+        var IRate = $("#lastName").val();
+        var IQuantity = $("#phone").val();
+
+        console.log(ItemName); console.log(IRate); console.log(IQuantity);
+
+        var NameInput = '<input type="text"  name="ItemName[]" readonly value="' + ItemName + '">';
+        var LastRate = '<input type="text"  name="IRate[]" readonly value="' + IRate + '">';
+        var QuantityInput = '<input type="text" name="IQuantity[]" readonly value="' + IQuantity + '">';
+
+        $("#AddItem").append(NameInput);
+        $("#AddItem").append(LastRate);
+        $("#AddItem").append(QuantityInput);
+        $("#AddItem").append("<br>");
+
+    });
+</script>
+ *@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#fistName").on("input", function () {
+            var itemName = $(this).val();
+            if (itemName.length > 20) {
+                $(this).val(itemName.substring(0, 20));
+                $("#itemNameValidation").html("Item Name should be at most 20 characters.");
+            } else {
+                $("#itemNameValidation").html("");
+            }
+        });
+
+        $("#lastName, #phone").on("input", function () {
+            var inputValue = $(this).val();
+            if (!/^\d+$/.test(inputValue)) {
+                $(this).val("");
+                if (this.id === "lastName") {
+                    $("#irateValidation").html("Item Rate must be an integer.");
+                } else if (this.id === "phone") {
+                    $("#iquantityValidation").html("Item Quantity must be an integer.");
+                }
+            } else {
+                $("#irateValidation, #iquantityValidation").html("");
+            }
+        });
+    });
+    $("#AddButton").click(function () {
+        var ItemName = $("#fistName").val();
+        var IRate = $("#lastName").val();
+        var IQuantity = $("#phone").val();
+
+        console.log(ItemName); console.log(IRate); console.log(IQuantity);
+
+        var NameInput = '<input type="text"  name="ItemName[]" readonly value="' + ItemName + '">';
+        var LastRate = '<input type="text"  name="IRate[]" readonly value="' + IRate + '">';
+        var QuantityInput = '<input type="text" name="IQuantity[]" readonly value="' + IQuantity + '">';
+
+        $("#AddItem").append(NameInput);
+        $("#AddItem").append(LastRate);
+        $("#AddItem").append(QuantityInput);
+        $("#AddItem").append("<br>");
+
     });
 
 </script>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

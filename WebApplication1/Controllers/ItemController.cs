@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Castle.Core.Resource;
 using LibraryClass.Data;
 using LibraryClass.Models;
 using LibraryClass.Models.DTO;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
 using System.Reflection.Metadata;
 
 namespace WebApplication1.Controllers
@@ -30,8 +32,16 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                var resultItem = new List<Item>();
                 var allItems = await _itemRepository.GetAll();
-                _apiresponse.Result = allItems;
+                foreach(var items in allItems)
+                {
+                    if(items.deleteflag == false)
+                    {
+                        resultItem.Add(items);
+                    }
+                }
+                _apiresponse.Result = resultItem;
                 return Ok(_apiresponse);
             }
             catch (Exception)
@@ -63,15 +73,25 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Item>> CreateItem(ItemDTO item)
+        public async Task<ActionResult<Item>> CreateItem(List<ItemDTO> item)
         {
+            ItemDTO custDTO = new ItemDTO();
             try
             {
-                if(item.IQuantity>=0)
+                for (int i = 0; i < item.Count; i++)
                 {
-                    var result = _mapper.Map<Item>(item);
-                    await _itemRepository.Add(result);
-                    _apiresponse.Result = item;
+                    if (item[i].IQuantity > 0)
+                    {
+                        ItemDTO custDTO1 = new ItemDTO();
+                        custDTO1.ItemName = item[i].ItemName;
+                        custDTO1.IRate = item[i].IRate;
+                        custDTO1.IQuantity = (int)item[i].IQuantity;
+                        custDTO1.EventDateTime = item[i].EventDateTime;
+                        custDTO = custDTO1;
+                        var result = _mapper.Map<Item>(custDTO);
+                        await _itemRepository.Add(result);
+                        _apiresponse.Result = result;
+                    }
                 }
                 return Ok(_apiresponse);
             }
@@ -107,8 +127,10 @@ namespace WebApplication1.Controllers
                 if (item == null)
                 {
                     return NotFound($"Item With ID = {ItemName} Not Found");
-                } 
-                await _itemRepository.Delete(ItemName);
+                }
+                item.deleteflag = true;
+                await _itemRepository.Update(item);
+                //await _itemRepository.Delete(ItemName);
                 _apiresponse.Result = $"Student With ID = {ItemName} Is Deleted";
                 return Ok(_apiresponse);
             }

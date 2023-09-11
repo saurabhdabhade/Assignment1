@@ -19,5 +19,8 @@ namespace LibraryClass.Models
         [Required]
         public int IQuantity { get; set; }
         public DateTime EventDateTime { get; set; }= DateTime.Now;
+
+        public bool deleteflag { get; set; }
+
     }
 }

@@ -69,9 +69,32 @@ namespace MVCApplication1.Controllers
             ViewData["logOut"] = true;
             return View();
         }
-        public async Task<IActionResult> Create_Item(ItemViewModel itemRequest) 
+        public async Task<IActionResult> Create_Item(GetItems itemRequest) 
         {
-            await _itemService.CreateAsync<APIResponse>(itemRequest);
+            if (itemRequest == null || itemRequest.ItemName == null || itemRequest.IRate == null || itemRequest.IQuantity == null)
+            {
+                ModelState.AddModelError(string.Empty, "item name must be less than 20");
+                return View("create"); // Return to the same view to display validation errors
+            }
+            List<ItemViewModel> itemViewModels = new List<ItemViewModel>();
+            var authorsArray = new List<ItemViewModel>();
+            for (int i = 0; i < itemRequest.ItemName.Count; i++)
+            {
+                if ( itemRequest.ItemName[i].Length>20)
+                {
+                    ModelState.AddModelError(string.Empty, "item name must be less than 20");
+                    return View("Create"); // Return to the same view to display validation errors
+                }
+                var customerRequest = new ItemViewModel()
+                {
+                    ItemName = itemRequest.ItemName[i],
+                    IRate = itemRequest.IRate[i],
+                    IQuantity = itemRequest.IQuantity[i],
+                };
+                authorsArray.Add(customerRequest);
+            }
+
+            await _itemService.CreateAsync1<APIResponse>(authorsArray);
             TempData["SuccessMessage"] = "Item added successfully!";
             return RedirectToAction("GetallItems", "Item");
         }

@@ -185,8 +185,8 @@ namespace MVCApplication1.Controllers
                 String body = "Congratulations, Your Password Is Updated Successfully!...";
                 reg.LastPassword1 = newPassword;
                 reg.LastPassword2 = result.Password;
-                reg.Password = newPassword;
-                reg.Confirm_Password = newPassword;
+                reg.Password = Encryption.Encrypt(newPassword);
+                reg.Confirm_Password = Encryption.Encrypt(newPassword);
                 reg.Email = email;
                 reg.Last_Name = result.Last_Name;
                 reg.First_Name = result.First_Name;

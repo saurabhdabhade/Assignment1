@@ -2,6 +2,7 @@
 using LibraryClass.Data;
 using LibraryClass.Models;
 using LibraryClass.Models.DTO;
+using LibraryClass.Repository;
 using LibraryClass.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +31,16 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                var resultCustomer = new List<Customer>();
                 var result = await _customerRepository.GetAll();
-                _apiResponse.Result = result;
+                foreach (var custom in result)
+                {
+                    if (custom.IsDeleted == false)
+                    {
+                        resultCustomer.Add(custom);
+                    }
+                }
+                _apiResponse.Result = resultCustomer;
                 return Ok(_apiResponse);
             }
             catch (Exception)
@@ -134,7 +143,14 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                await _customerRepository.Delete(Email);
+                var cust = await _customerRepository.Get(Email);
+                if (cust == null)
+                {
+                    return NotFound($"Customer With ID = {Email} Not Found");
+                }
+                cust.IsDeleted = true;
+                await _customerRepository.Update(cust);
+                //await _customerRepository.Delete(Email);
                 _apiResponse.Result = $"Student With ID = {Email} Is Deleted";
                 return Ok(_apiResponse);
             }

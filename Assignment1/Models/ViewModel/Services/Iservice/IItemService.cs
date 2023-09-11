@@ -10,5 +10,7 @@ namespace MVCApplication1.Services.Iservice
         Task<T> UpdateAsync<T>(ItemViewModel Entity);
         Task<T> GetAllAsync<T>();
         Task<T> GetAsync<T>(string itemName);
+        Task CreateAsync1<T>(List<ItemViewModel> authorsArray);
+
     }
 }

@@ -27,6 +27,16 @@ namespace MVCApplication1.Services
             }); 
         }
 
+        public Task CreateAsync1<T>(List<ItemViewModel> authorsArray)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = "Post",
+                Data = authorsArray,
+                Url = itemUrl + "ItemController"
+            });
+        }
+
         public Task<T> DeleteAsync<T>(string itemName)
         {
             return SendAsync<T>(new APIRequest()

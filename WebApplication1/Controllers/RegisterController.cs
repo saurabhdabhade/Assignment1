@@ -56,8 +56,16 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                var resultRegister = new List<Register>();
                 IEnumerable<Register> registerList = await _registerRepository.GetAll();
-                _apiresponse.Result = registerList;
+                foreach (var reg in registerList)
+                {
+                    if (reg.IsDeleted == false)
+                    {
+                        resultRegister.Add(reg);
+                    }
+                }
+                _apiresponse.Result = resultRegister;
                 return Ok(_apiresponse);
             }
             catch (Exception)
@@ -114,7 +122,9 @@ namespace WebApplication1.Controllers
                 {
                     return NotFound($"Item With ID = {RegisterID} Not Found");
                 }
-                await _registerRepository.Delete(RegisterID);
+                register.IsDeleted = true;
+                await _registerRepository.Update(register);
+                // await _registerRepository.Delete(RegisterID);
                 _apiresponse.Result = $"Student With ID = {RegisterID} Is Deleted";
                 return Ok(_apiresponse);
             }

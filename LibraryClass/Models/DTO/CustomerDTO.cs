@@ -27,5 +27,8 @@ namespace LibraryClass.Models.DTO
         public long Cust_Phone { get; set; }
 
         public DateTime EventDateTime { get; set; } = DateTime.Now;
+
+        public bool IsDeleted { get; set; }
+
     }
 }

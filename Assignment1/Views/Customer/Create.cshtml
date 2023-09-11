@@ -5,6 +5,13 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,23 +140,25 @@
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
                         <label for="Cust_FirstName" class="control-label">First Name:</label>
-                        <input id= "firstName"  class="form-control" />
+                    <input id="firstName" class="form-control" maxlength="30" />
                     </div>
                 <div  class="form-group">
                         <label for="Cust_LastName" class="control-label">Last Name:</label>
-                    <input id="lastName"  class="form-control" />
+                    <input id="lastName" class="form-control" maxlength="30" />
                     </div>
                 <div  class="form-group">
                         <label for="Cust_Phone" class="control-label">Phone:</label>
-                    <input id="phone"  class="form-control" />
+                    <input id="phone" class="form-control" type="tel" maxlength="10" pattern="[0-9]{10}" />
+                    <div style="color:red" id="phoneValidation" class="validation-message"></div>
                     </div>
                 <div  class="form-group">
                         <label for="Cust_Email" class="control-label">Email:</label>
-                    <input id="email"  class="form-control" />
+                    <input id='email' class='form-control' type="email" maxlength='30'  />
                         <div style="color:red" id="resultDiv"></div>
                         <div style="color:green" id="resultDiv1"></div>
                         <div class="result" id="resultDiv"></div>
                         <div class="result" id="resultDiv1"></div>
+                    <div style="color:red" id="emailValidation" class="validation-message"></div>
                     </div>
                     <div class="form-group">
                         <input id="AddButton" type="button" value="Add" class="btn btn-primary" />
@@ -167,82 +176,67 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Attach the blur event handler to the input element
-        $("#myInput").blur(function () {
-            // Get the value from the input element
-            var inputValue = $(this).val();
+     
 
-            // Perform the AJAX call
-            $.ajax({
-                type: "POST",
-                url: "Ajax_Response", // Replace with your controller and action method's URL
-                data: { Cust_Email: inputValue }, // Send the input value to the controller
-                success: function (response) {
-                    if (response.includes('Already')) {
-                        $("#resultDiv").append(response);
-                    } else {
-                        $("#resultDiv1").html(response);
-                    }
-                },
-                error: function (error) {
-                    // Handle errors, if any
-                    console.error(error);
-                }
-            });
+        $("#phone").on("input", function () {
+            var phone = $(this).val();
+            var phoneValidationMessage = $("#phoneValidation");
+
+            if (!isValidPhoneNumber(phone)) {
+                phoneValidationMessage.text("Phone number should contain only digits (10 digits).");
+                return;
+            }
+
+            phoneValidationMessage.text("");
         });
-    });
 
 
+        $("#AddButton").click(function () {
+            var Cust_FirstName = $("#firstName").val();
+            var Cust_LastName = $("#lastName").val();
+            var Cust_Phone = $("#phone").val();
+            var Cust_Email = $("#email").val();
 
-    $(document).ready(function () {
-        $('#submitButton').click(function () {
-            var formData = $('#customerForm').serialize();
-            var url = '/Customer/CreateCustomer'; // Replace with your actual URL
+            // Check if any of the input fields is empty
+            if (Cust_FirstName === '' || Cust_LastName === '' || Cust_Phone === '' || Cust_Email === '') {
+                // Display a validation message
+                alert("Please fill in all fields before adding.");
+                return; // Exit the function without adding empty values
+            }
 
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: formData,
-                success: function (result) {
-                    // Handle the success response if needed
-                    // For example, display a success message
-                    $('#resultDiv').text('Customer created successfully.');
-                    $('#resultDiv').css('color', 'green');
-                },
-                error: function (error) {
-                    // Handle the error response if needed
-                    // For example, display an error message
-                    $('#resultDiv').text('Error creating customer.');
-                    $('#resultDiv').css('color', 'red');
-                }
-            });
+            console.log(Cust_FirstName);
+            console.log(Cust_LastName);
+            console.log(Cust_Phone);
+            console.log(Cust_Email);
+
+            var NameInput = '<input type="text"  name="Cust_FirstName[]" readonly value="' + Cust_FirstName + '">';
+            var LastInput = '<input type="text"  name="Cust_LastName[]" readonly value="' + Cust_LastName + '">';
+            var PInput = '<input type="text" name="Cust_Phone[]" readonly value="' + Cust_Phone + '">';
+            var EInput = '<input type="text" name="Cust_Email[]" readonly value="' + Cust_Email + '">';
+
+            $("#AddCustomer").append(NameInput);
+            $("#AddCustomer").append(LastInput);
+            $("#AddCustomer").append(PInput);
+            $("#AddCustomer").append(EInput);
+            $("#AddCustomer").append("<br>");
+
+            // Clear the input fields after adding
+            $("#firstName").val('');
+            $("#lastName").val('');
+            $("#phone").val('');
+            $("#email").val('');
         });
-    });
 
-
-
-
-    $("#AddButton").click(function () {
-        var Cust_FirstName = $("#firstName").val();
-        var Cust_LastName = $("#lastName").val();
-        var Cust_Phone = $("#phone").val();
-        var Cust_Email = $("#email").val();
-
-        console.log(Cust_FirstName); console.log(Cust_LastName); console.log(Cust_Phone); console.log(Cust_Email);
-
-        var NameInput = '<input type="text"  name="Cust_FirstName[]" readonly value="' + Cust_FirstName + '">';
-        var LastInput = '<input type="text"  name="Cust_LastName[]" readonly value="' + Cust_LastName + '">';
-        var PInput = '<input type="text" name="Cust_Phone[]" readonly value="' + Cust_Phone + '">';
-        var EInput = '<input type="text" name="Cust_Email[]" readonly value="' + Cust_Email + '">';
-
-        $("#AddCustomer").append(NameInput);
-        $("#AddCustomer").append(LastInput);
-        $("#AddCustomer").append(PInput);
-        $("#AddCustomer").append(EInput);
-        $("#AddCustomer").append("<br>");
-
+       
+        function isValidPhoneNumber(phone) {
+            // Regular expression for 10-digit phone number validation
+            var phoneRegex = /^[0-9]{10}$/;
+            return phoneRegex.test(phone);
+        }
     });
 </script>
+
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

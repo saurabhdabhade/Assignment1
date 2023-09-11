@@ -19,7 +19,6 @@ namespace WebApplication1.Controllers
         private readonly IMapper _mapper;
         private readonly APIResponse _apiResponse = new APIResponse();
 
-
         public PlaceOrderController(IPlaceOrder placeOrderRepository, IMapper mapper)
         {
             _placeOrderRepository = placeOrderRepository;
@@ -31,8 +30,16 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                var resultPlaces = new List<PlaceOrder>();
                 var allOrders = await _placeOrderRepository.GetAll();
-                _apiResponse.Result = allOrders;
+                foreach (var place in allOrders)
+                {
+                    if (place.IsDeleted == false)
+                    {
+                        resultPlaces.Add(place);
+                    }
+                }
+                _apiResponse.Result = resultPlaces;
                 return Ok(_apiResponse);
             }
             catch (Exception)
@@ -68,7 +75,7 @@ namespace WebApplication1.Controllers
             try
             {
                 String subject = "Welcome";
-                String body = "Welcome, Your Oredr ID Number " + placeOrderDTO.OrderID + " With Bill Of " + placeOrderDTO.IRate
+                String body = "Welcome, Your Order ID Number " + placeOrderDTO.OrderID + " With Bill Of " + placeOrderDTO.IRate
                     + " For The Item " + placeOrderDTO.ItemName + " With The " + placeOrderDTO.IQuantity + " Quantity Is Placed Successfully...";
 
                 var result = _mapper.Map<PlaceOrder>(placeOrderDTO);
@@ -76,7 +83,6 @@ namespace WebApplication1.Controllers
                 EmailSender emailSender = new EmailSender();
                 emailSender.SendEmail(placeOrderDTO.Cust_Email, subject, body);
                 _apiResponse.Result = result;
-                //_apiResponse.Result = customer;
                 return Ok(_apiResponse);
             }
             catch (Exception)
@@ -105,20 +111,21 @@ namespace WebApplication1.Controllers
         [HttpDelete("{OrderID}")]
         public async Task<ActionResult> DeletePlaceOrder(int OrderID)
         {
-            PlaceOrderDTO placeOrderDTO = new PlaceOrderDTO();
             try
             {
-                //string userIpAddress = HttpContext.Connection.RemoteIpAddress.ToString();
+                
                 String subject = "Apology";
-                String body = "Ohh Sorry!, Your Order Is Cancelled...";
+                String body = "Ohh Sorry!, Your Order ID Number " + OrderID + " Is Cancelled...";
                 var placeOrder = await _placeOrderRepository.Get(OrderID);
                 if (placeOrder == null)
                 {
                     return NotFound($"PlaceOrder With ID = {OrderID} Not Found");
                 }
+                placeOrder.IsDeleted = true;   
                 //find placeOrder by orderid
                 var rr = await _placeOrderRepository.Get(OrderID);
-                await _placeOrderRepository.Delete(OrderID);
+                await _placeOrderRepository.Update(placeOrder);
+                //await _placeOrderRepository.Delete(OrderID);
                 EmailSender emailSender = new EmailSender();
                 emailSender.SendEmail(rr.Cust_Email, subject, body);
                 _apiResponse.Result = $"Student With ID = {OrderID} Is Deleted";

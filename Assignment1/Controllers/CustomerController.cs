@@ -22,9 +22,11 @@ namespace MVCApplication1.Controllers
     public class CustomerController : Controller
     {
         private readonly ICustomerService _customerService;
-        public CustomerController(ICustomerService customerService)
+        private readonly MyDBContext _myDBContext;
+        public CustomerController(ICustomerService customerService, MyDBContext myDBContext)
         {
             _customerService = customerService;
+            _myDBContext = myDBContext;
         }
 
         public async Task<IActionResult> ExcelDownload()
@@ -88,9 +90,16 @@ namespace MVCApplication1.Controllers
                     Cust_Phone = model.Cust_Phone[i],
                     Cust_Email = model.Cust_Email[i],
                 };
+
+                if (_myDBContext.customers.Where(x => x.Cust_Phone == model.Cust_Phone[i]).Any())
+                {
+                    TempData["SuccessMessage"] = "The Given Mobile Number Is Already Exist!...";
+                    return RedirectToAction("Create", "Customer");
+                }
                 authorsArray.Add(customerRequest);
                //await _customerService.CreateAsync<APIResponse>(customerRequest);
             }
+            
             await _customerService.CreateAsync1<APIResponse>(authorsArray);
             TempData["SuccessMessage"] = "Customer added successfully!";
             return RedirectToAction("GetAllCustomers", "Customer");

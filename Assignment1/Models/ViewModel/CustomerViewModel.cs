@@ -23,16 +23,28 @@ namespace MVCApplication1.Models.ViewModel
         public long Cust_Phone { get; set; }
 
         public DateTime EventDateTime { get; set; } = DateTime.Now;
+
+        public bool IsDeleted { get; set; }
+
     }
 
 
     public class GetCustomerData
     {
+        [Required]
         public List<string> Cust_FirstName { get; set; }
+        [Required]
         public List<string> Cust_LastName { get; set; }
+
+        [Required]
         public List<long> Cust_Phone { get; set; }
+
+        [Required]
         public List<string> Cust_Email { get; set; }
         public DateTime EventDateTime { get; set; } = DateTime.Now;
+
+        public bool IsDeleted { get; set; }
+
 
     }
 }

@@ -28,5 +28,8 @@ namespace LibraryClass.Models
 
         public DateTime EventDateTime { get; set; } = DateTime.Now;
         public string ipAddress { get; set; }
+
+        public bool IsDeleted { get; set; }
+
     }
 }
